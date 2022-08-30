@@ -1,5 +1,5 @@
 [workspace]
-members = ["blink"]
+members = ["blink", "big_firmware"]
 
 # cargo build/run
 [profile.dev]
