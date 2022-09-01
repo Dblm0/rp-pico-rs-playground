@@ -18,7 +18,8 @@ const LOW: u16 = 0;
 // The maximum PWM value (i.e. LED brightness) we want
 const HIGH: u16 = 25000;
 // Text data blob
-const BLOB: &str = include_str!("blob.txt");
+
+const BLOB: &str = big_firmware::generate_blob!();
 
 #[entry]
 fn main() -> ! {
@@ -59,7 +60,7 @@ fn main() -> ! {
     info!("blob read begin:");
     let mut d = 0;
     for _line in BLOB.lines() {
-        d = d + 1;
+        d += 1;
     }
     info!("blob read end. total lines = {}", d);
     delay.delay_ms(1_000);
