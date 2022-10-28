@@ -1,0 +1,26 @@
+[package]
+edition = "2021"
+name = "enc28j60_test"
+version = "0.1.0"
+
+[dependencies]
+cortex-m = "0.7"
+cortex-m-rt = "0.7"
+embedded-hal = { version = "0.2.5", features = ["unproven"] }
+embedded-time = "0.12"
+
+defmt = "0.3"
+defmt-rtt = "0.3"
+panic-probe = { version = "0.3", features = ["print-defmt"] }
+
+rp-pico = "0.4"
+
+[dependencies.enc28j60]
+git = "https://github.com/fmckeogh/enc28j60"
+rev = "35eba9128434a9c721eea5b0fb45798c91bf76b3"
+features = ["smoltcp"]
+
+[dependencies.smoltcp]
+version = "0.7.0"
+default-features = false
+features = ["proto-ipv4", "socket-tcp", "ethernet"]
