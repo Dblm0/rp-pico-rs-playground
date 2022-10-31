@@ -1,6 +1,7 @@
 #![no_std]
 #![no_main]
 
+use core::fmt::Write;
 use defmt::*;
 use defmt_rtt as _;
 use embedded_hal::digital::v2::{OutputPin, StatefulOutputPin};
@@ -16,7 +17,7 @@ use smoltcp::{
 };
 /* Configuration */
 const SRC_MAC: [u8; 6] = [0x20, 0x18, 0x03, 0x01, 0x00, 0x00];
-
+const LOCAL_ADDR: smoltcp::wire::Ipv4Address = Ipv4Address::new(1, 0, 15, 45);
 #[rp_pico::entry]
 fn main() -> ! {
     info!("Program start");
@@ -93,8 +94,7 @@ fn main() -> ! {
     debug!("Phy Wrapper created");
 
     // Ethernet interface
-    let local_addr = Ipv4Address::new(192, 168, 5, 2);
-    let ip_addr = IpCidr::new(IpAddress::from(local_addr), 24);
+    let ip_addr = IpCidr::new(IpAddress::from(LOCAL_ADDR), 24);
     let mut ip_addrs = [ip_addr];
     let mut neighbor_storage = [None; 16];
     let neighbor_cache = NeighborCache::new(&mut neighbor_storage[..]);
@@ -129,16 +129,19 @@ fn main() -> ! {
                     }
 
                     if socket.can_send() {
-                        // Toggle LED, without using ToggleableOutputPin in case it isn't implemented.
                         let _ = match led.is_set_high() {
                             Result::Ok(true) => led.set_low(),
                             _ => led.set_high(),
                         };
                         count += 1;
                         debug!("tcp:80 send");
-                        socket
-                            .send_slice("HTTP/1.1 200 OK\r\n\r\nHello!".as_bytes())
-                            .unwrap();
+
+                        core::write!(socket, "HTTP/1.1 200 OK\r\n\r\nHello!\nLED is currently {} and has been toggled {} times.\n", match led.is_set_low() {
+                            Result::Ok(true) => "on",
+                            Result::Ok(false) => "off",
+                            _ => "Error",
+                        },
+                        count).unwrap();
 
                         debug!("tcp:80 close");
                         socket.close();
@@ -146,8 +149,7 @@ fn main() -> ! {
                 }
             }
             Err(e) => {
-                crate::todo!();
-                // debug!(core::format_args!("{:?}", e));
+                debug!("{:?}", defmt::Debug2Format(&e));
             }
         }
     }
