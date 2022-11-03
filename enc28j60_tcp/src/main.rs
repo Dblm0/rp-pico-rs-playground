@@ -10,8 +10,8 @@ use enc28j60::{smoltcp_phy::Phy, Enc28j60};
 use panic_probe as _;
 use rp_pico::hal::{self, gpio, pac, prelude::*, spi};
 use smoltcp::{
-    iface::{EthernetInterfaceBuilder, NeighborCache},
-    socket::{SocketSet, TcpSocket, TcpSocketBuffer},
+    iface::{InterfaceBuilder, NeighborCache, SocketSet},
+    socket::tcp,
     time::Instant,
     wire::{EthernetAddress, IpAddress, IpCidr, Ipv4Address},
 };
@@ -94,63 +94,67 @@ fn main() -> ! {
     debug!("Phy Wrapper created");
 
     // Ethernet interface
-    let ip_addr = IpCidr::new(IpAddress::from(LOCAL_ADDR), 24);
-    let mut ip_addrs = [ip_addr];
+    let mut ip_addrs = [IpCidr::new(IpAddress::from(LOCAL_ADDR), 24)];
     let mut neighbor_storage = [None; 16];
     let neighbor_cache = NeighborCache::new(&mut neighbor_storage[..]);
     let ethernet_addr = EthernetAddress(SRC_MAC);
-    let mut iface = EthernetInterfaceBuilder::new(&mut eth)
-        .ethernet_addr(ethernet_addr)
+    let mut iface = InterfaceBuilder::new()
+        .hardware_addr(ethernet_addr.into())
         .ip_addrs(&mut ip_addrs[..])
         .neighbor_cache(neighbor_cache)
-        .finalize();
-    debug!("Ethernet initialized");
+        .finalize(&mut eth);
+    debug!("Ethernet initialized with ip addr {}", iface.ipv4_address());
 
     // Sockets
     let mut server_rx_buffer = [0; 2048];
     let mut server_tx_buffer = [0; 2048];
-    let server_socket = TcpSocket::new(
-        TcpSocketBuffer::new(&mut server_rx_buffer[..]),
-        TcpSocketBuffer::new(&mut server_tx_buffer[..]),
+    let server_socket = tcp::Socket::new(
+        tcp::SocketBuffer::new(&mut server_rx_buffer[..]),
+        tcp::SocketBuffer::new(&mut server_tx_buffer[..]),
     );
-    let mut sockets_storage = [None, None];
-    let mut sockets = SocketSet::new(&mut sockets_storage[..]);
+
+    let mut sockets: [_; 1] = Default::default();
+    let mut sockets = SocketSet::new(&mut sockets[..]);
     let server_handle = sockets.add(server_socket);
     debug!("Sockets initialized");
 
     let mut count: u64 = 0;
     loop {
-        match iface.poll(&mut sockets, Instant::from_millis(0)) {
-            Ok(b) => {
-                if b {
-                    let mut socket = sockets.get::<TcpSocket>(server_handle);
-                    if !socket.is_open() {
-                        socket.listen(80).unwrap();
-                    }
-
-                    if socket.can_send() {
-                        let _ = match led.is_set_high() {
-                            Result::Ok(true) => led.set_low(),
-                            _ => led.set_high(),
-                        };
-                        count += 1;
-                        debug!("tcp:80 send");
-
-                        core::write!(socket, "HTTP/1.1 200 OK\r\n\r\nHello!\nLED is currently {} and has been toggled {} times.\n", match led.is_set_low() {
-                            Result::Ok(true) => "on",
-                            Result::Ok(false) => "off",
-                            _ => "Error",
-                        },
-                        count).unwrap();
-
-                        debug!("tcp:80 close");
-                        socket.close();
-                    }
-                }
-            }
+        match iface.poll(Instant::from_millis(0), &mut eth, &mut sockets) {
+            Ok(_) => {}
             Err(e) => {
-                debug!("{:?}", defmt::Debug2Format(&e));
+                debug!("poll error: {}", e);
             }
+        };
+
+        let socket = sockets.get_mut::<tcp::Socket>(server_handle);
+        if !socket.is_active() && !socket.is_listening() {
+            socket.listen(80).unwrap();
+            debug!("listening");
+        }
+
+        if socket.can_recv() {
+            debug!(
+                "got {:?}",
+                socket.recv(|buffer| { (buffer.len(), core::str::from_utf8(buffer).unwrap()) })
+            );
+            debug!("from{}", socket.remote_endpoint());
+
+            //change LED state
+            let _ = match led.is_set_high() {
+                Result::Ok(true) => led.set_low(),
+                _ => led.set_high(),
+            };
+            count += 1;
+
+            core::write!(socket, "HTTP/1.1 200 OK\r\n\r\nHello!\nLED is currently {} and has been toggled {} times.\n", match led.is_set_low() {
+                    Result::Ok(true) => "on",
+                    Result::Ok(false) => "off",
+                    _ => "Error",
+                },
+                count).unwrap();
+
+            socket.close();
         }
     }
 }

@@ -16,11 +16,12 @@ panic-probe = { version = "0.3", features = ["print-defmt"] }
 rp-pico = "0.4"
 
 [dependencies.enc28j60]
-git = "https://github.com/fmckeogh/enc28j60"
-rev = "35eba9128434a9c721eea5b0fb45798c91bf76b3"
+git = "https://github.com/Dblm0/enc28j60"
+rev = "32e7b1aafbdab76e608d743d2c620514c3e33da9"
 features = ["smoltcp"]
 
 [dependencies.smoltcp]
-version = "0.7.0"
+git = "https://github.com/smoltcp-rs/smoltcp"
+version = "0.8.1"
 default-features = false
-features = ["proto-ipv4", "socket-tcp", "ethernet"]
+features = ["proto-ipv4", "socket-tcp", "medium-ethernet", "defmt"]
