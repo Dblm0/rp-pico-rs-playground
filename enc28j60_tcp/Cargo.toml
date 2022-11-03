@@ -1,6 +1,6 @@
 [package]
 edition = "2021"
-name = "enc28j60_test"
+name = "enc28j60_tcp"
 version = "0.1.0"
 
 [dependencies]
