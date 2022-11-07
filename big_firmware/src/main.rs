@@ -2,7 +2,6 @@
 #![no_main]
 
 use embedded_hal::PwmPin;
-use embedded_time::rate::*;
 use rp_pico as bsp;
 use rp_pico::hal;
 use rp_pico::hal::pac;
@@ -47,7 +46,7 @@ fn main() -> ! {
         &mut pac.RESETS,
     );
 
-    let mut delay = cortex_m::delay::Delay::new(core.SYST, clocks.system_clock.freq().integer());
+    let mut delay = cortex_m::delay::Delay::new(core.SYST, clocks.system_clock.freq().to_Hz());
     let mut pwm_slices = hal::pwm::Slices::new(pac.PWM, &mut pac.RESETS);
 
     let pwm = &mut pwm_slices.pwm4;

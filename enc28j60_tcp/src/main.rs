@@ -5,8 +5,8 @@ use core::fmt::Write;
 use defmt::*;
 use defmt_rtt as _;
 use embedded_hal::digital::v2::{OutputPin, StatefulOutputPin};
-use embedded_time::rate::*;
 use enc28j60::{smoltcp_phy::Phy, Enc28j60};
+use fugit::RateExtU32;
 use panic_probe as _;
 use rp_pico::hal::{self, gpio, pac, prelude::*, spi};
 use smoltcp::{
@@ -48,7 +48,7 @@ fn main() -> ! {
         &mut pac.RESETS,
     );
     let mut led = pins.led.into_push_pull_output();
-    let mut delay = cortex_m::delay::Delay::new(core.SYST, clocks.system_clock.freq().integer());
+    let mut delay = cortex_m::delay::Delay::new(core.SYST, clocks.system_clock.freq().to_Hz());
 
     //SPI
     let spi = {
@@ -60,7 +60,7 @@ fn main() -> ! {
         spi.init(
             &mut pac.RESETS,
             clocks.peripheral_clock.freq(),
-            1_000_000u32.Hz(),
+            1.MHz(),
             &embedded_hal::spi::MODE_0,
         )
     };
