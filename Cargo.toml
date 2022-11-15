@@ -1,5 +1,5 @@
 [workspace]
-members = ["blink", "big_firmware", "enc28j60_tcp"]
+members = ["blink", "big_firmware", "enc28j60_tcp", "defmt_test"]
 
 # cargo build/run
 [profile.dev]
