@@ -254,22 +254,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "defmt_test"
-version = "0.1.0"
-dependencies = [
- "cortex-m",
- "cortex-m-rt",
- "defmt",
- "defmt-rtt",
- "defmt-test",
- "embedded-hal",
- "fugit",
- "num-traits",
- "panic-probe",
- "rp-pico",
-]
-
-[[package]]
 name = "either"
 version = "1.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -462,6 +446,22 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn",
+]
+
+[[package]]
+name = "on_chip_tests"
+version = "0.1.0"
+dependencies = [
+ "cortex-m",
+ "cortex-m-rt",
+ "defmt",
+ "defmt-rtt",
+ "defmt-test",
+ "embedded-hal",
+ "fugit",
+ "num-traits",
+ "panic-probe",
+ "rp-pico",
 ]
 
 [[package]]
