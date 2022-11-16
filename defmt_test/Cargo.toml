@@ -5,7 +5,7 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-[dependencies]
+[dev-dependencies]
 cortex-m = "0.7.6"
 cortex-m-rt = "0.7.1"
 embedded-hal = { version = "0.2.7", features = ["unproven"] }
@@ -16,3 +16,10 @@ defmt-rtt = "0.4.0"
 panic-probe = { version = "0.3.0", features = ["print-defmt"] }
 
 rp-pico = "0.5.0"
+
+defmt-test = "0.3"
+num-traits = { version = "0.2", default-features = false }
+
+[[test]]
+name = "temperature_tests"
+harness = false

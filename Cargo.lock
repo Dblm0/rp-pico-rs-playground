@@ -231,6 +231,29 @@ dependencies = [
 ]
 
 [[package]]
+name = "defmt-test"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4df24f1ca104a0c1bce2047d8a21aa9fa29695e5d662118eb48daedb97edca88"
+dependencies = [
+ "cortex-m",
+ "cortex-m-rt",
+ "defmt",
+ "defmt-test-macros",
+]
+
+[[package]]
+name = "defmt-test-macros"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "94a0dfea4063d72e1ba20494dfbc4667f67420869328cf3670b5824a38a22dc1"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "defmt_test"
 version = "0.1.0"
 dependencies = [
@@ -238,8 +261,10 @@ dependencies = [
  "cortex-m-rt",
  "defmt",
  "defmt-rtt",
+ "defmt-test",
  "embedded-hal",
  "fugit",
+ "num-traits",
  "panic-probe",
  "rp-pico",
 ]
@@ -409,6 +434,15 @@ name = "nb"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "546c37ac5d9e56f55e73b677106873d9d9f5190605e41a856503623648488cae"
+
+[[package]]
+name = "num-traits"
+version = "0.2.15"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "578ede34cf02f8924ab9447f50c28075b4d3e5b269972345e7e0372b38c6cdcd"
+dependencies = [
+ "autocfg",
+]
 
 [[package]]
 name = "num_enum"
