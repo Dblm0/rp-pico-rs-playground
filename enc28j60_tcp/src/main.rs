@@ -118,7 +118,7 @@ fn main() -> ! {
     let server_handle = sockets.add(server_socket);
     debug!("Sockets initialized");
 
-    let mut count: u64 = 0;
+    let mut count: u8 = 0;
     loop {
         match iface.poll(Instant::from_millis(0), &mut eth, &mut sockets) {
             Ok(_) => {}
