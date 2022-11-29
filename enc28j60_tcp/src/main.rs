@@ -145,7 +145,7 @@ fn main() -> ! {
                 Result::Ok(true) => led.set_low(),
                 _ => led.set_high(),
             };
-            count += 1;
+            count = u8::wrapping_add(count, 1);
 
             core::write!(socket, "HTTP/1.1 200 OK\r\n\r\nHello!\nLED is currently {} and has been toggled {} times.\n", match led.is_set_low() {
                     Result::Ok(true) => "on",
