@@ -1,6 +1,13 @@
 [workspace]
 members = ["blink", "big_firmware", "enc28j60_tcp", "on_chip_tests"]
 
+#defmt pacthes
+[patch.crates-io]
+defmt = { git = "https://github.com/knurling-rs/defmt" }
+defmt-rtt = { git = "https://github.com/knurling-rs/defmt" }
+panic-probe = { git = "https://github.com/knurling-rs/defmt" }
+defmt-test = { git = "https://github.com/knurling-rs/defmt" }
+
 # cargo build/run
 [profile.dev]
 codegen-units = 1
