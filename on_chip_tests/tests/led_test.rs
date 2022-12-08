@@ -43,25 +43,16 @@ mod tests {
         pins.led.into_push_pull_output()
     }
 
-    // #[before_each]
-    // fn before_each(state: &mut Pin<Gpio25, Output<PushPull>>) {
-    //     state.set_low().unwrap();
-    // }
-
-    #[test]
-    fn led_test(state: &mut Pin<Gpio25, Output<PushPull>>) {
-        state.toggle().unwrap();
-        debug_assert!(state.is_set_high().unwrap());
-        state.toggle().unwrap();
-        debug_assert!(state.is_set_low().unwrap())
+    #[before_each]
+    fn before_each(state: &mut Pin<Gpio25, Output<PushPull>>) {
+        state.set_low().unwrap();
     }
 
     #[test]
-    #[should_panic]
-    fn should_fail(state: &mut Pin<Gpio25, Output<PushPull>>) {
-        state.toggle().unwrap();
-        debug_assert!(state.is_set_low().unwrap());
-        state.toggle().unwrap();
+    fn led_test(state: &mut Pin<Gpio25, Output<PushPull>>) {
+        let _ = state.toggle();
         debug_assert!(state.is_set_high().unwrap());
+        let _ = state.toggle();
+        debug_assert!(state.is_set_low().unwrap());
     }
 }

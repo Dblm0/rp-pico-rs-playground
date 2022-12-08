@@ -54,6 +54,12 @@ mod tests {
         super::sens::TemperatureSensor::new(adc, sens)
     }
 
+    #[before_each]
+    fn before_each(state: &mut super::sens::TemperatureSensor) {
+        let meas = state.read_temperature();
+        defmt::info!("Current temperature = {}°C", meas);
+    }
+
     #[test]
     fn max_temp_test(state: &mut super::sens::TemperatureSensor) {
         let meas = state.read_temperature();
