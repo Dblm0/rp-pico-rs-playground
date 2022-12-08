@@ -27,3 +27,7 @@ harness = false
 [[test]]
 name = "led_test"
 harness = false
+
+[[test]]
+name = "rom_func_tests"
+harness = false
