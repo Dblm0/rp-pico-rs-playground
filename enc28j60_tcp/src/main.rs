@@ -4,7 +4,7 @@
 use core::fmt::Write;
 use defmt::*;
 use defmt_rtt as _;
-use embedded_hal::digital::v2::{OutputPin, StatefulOutputPin};
+use embedded_hal::digital::v2::{OutputPin, StatefulOutputPin, ToggleableOutputPin};
 use enc28j60::{smoltcp_phy::Phy, Enc28j60};
 use fugit::RateExtU32;
 use panic_probe as _;
@@ -140,11 +140,7 @@ fn main() -> ! {
             );
             debug!("from{}", socket.remote_endpoint());
 
-            //change LED state
-            let _ = match led.is_set_high() {
-                Result::Ok(true) => led.set_low(),
-                _ => led.set_high(),
-            };
+            let _ = led.toggle();
             count = u8::wrapping_add(count, 1);
 
             core::write!(socket, "HTTP/1.1 200 OK\r\n\r\nHello!\nLED is currently {} and has been toggled {} times.\n", match led.is_set_low() {
