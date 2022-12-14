@@ -2,9 +2,9 @@
 members = ["blink", "big_firmware", "enc28j60_tcp", "on_chip_tests"]
 
 [workspace.dependencies]
-rp-pico = "0.5.0"
+rp-pico = "0.6.0"
 cortex-m = "0.7.6"
-cortex-m-rt = "0.7.1"
+cortex-m-rt = "0.7.2"
 embedded-hal = { version = "0.2.7", features = ["unproven"] }
 fugit = "0.3.6"
 
