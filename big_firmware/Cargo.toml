@@ -4,16 +4,15 @@ name = "big_firmware"
 version = "0.1.0"
 
 [dependencies]
-cortex-m = "0.7.6"
-cortex-m-rt = "0.7.1"
-embedded-hal = { version = "0.2.7", features = ["unproven"] }
-fugit = "0.3.6"
+rp-pico.workspace = true
+cortex-m.workspace = true
+cortex-m-rt.workspace = true
+embedded-hal.workspace = true
+fugit.workspace = true
 
-defmt = "0.3.2"
-defmt-rtt = "0.4.0"
-panic-probe = { version = "0.3.0", features = ["print-defmt"] }
-
-rp-pico = "0.5.0"
+defmt.workspace = true
+defmt-rtt.workspace = true
+panic-probe.workspace = true
 
 [lib]
 proc-macro = true
