@@ -1,0 +1,21 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "cargo",
+			"command": "build",
+			"problemMatcher": [
+				"$rustc"
+			],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"args": [
+				"--bin",
+				"enc28j60_tcp"
+			],
+			"label": "rust: cargo build"
+		}
+	]
+}
