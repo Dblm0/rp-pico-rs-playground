@@ -1,5 +1,11 @@
 [workspace]
-members = ["blink", "big_firmware", "enc28j60_tcp", "on_chip_tests"]
+members = [
+    "blink",
+    "big_firmware",
+    "enc28j60_tcp",
+    "on_chip_tests",
+    "signal_generator",
+]
 
 [workspace.dependencies]
 rp-pico = "0.6.0"
