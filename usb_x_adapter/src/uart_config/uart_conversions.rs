@@ -64,7 +64,7 @@ impl From<uart::UartConfig> for ConfigDTO {
             data_bits: value.data_bits.into(),
             stop_bits: value.stop_bits.into(),
             parity: value.parity.into(),
-            baudrate: value.baudrate,
+            baudrate: value.baudrate.to_Hz(),
         }
     }
 }
@@ -74,7 +74,7 @@ impl From<&ConfigDTO> for uart::UartConfig {
         config.data_bits = value.data_bits.into();
         config.stop_bits = value.stop_bits.into();
         config.parity = value.parity.into();
-        config.baudrate = value.baudrate;
+        config.baudrate = fugit::HertzU32::from_raw(value.baudrate);
         config
     }
 }

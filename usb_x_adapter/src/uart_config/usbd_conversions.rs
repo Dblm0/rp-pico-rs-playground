@@ -58,7 +58,7 @@ impl TryFrom<&usbd_serial::LineCoding> for ConfigDTO {
         let data_bits = value.data_bits().try_into()?;
         let stop_bits = value.stop_bits().try_into()?;
         let parity = value.parity_type().try_into()?;
-        let baudrate = fugit::HertzU32::from_raw(value.data_rate());
+        let baudrate = value.data_rate();
         Ok(Self {
             data_bits,
             stop_bits,

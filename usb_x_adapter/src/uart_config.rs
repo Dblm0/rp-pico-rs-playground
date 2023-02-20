@@ -1,15 +1,15 @@
-use fugit::HertzU32;
+use usbd_serial::LineCoding;
 
 mod uart_conversions;
 mod usbd_conversions;
 
-#[derive(Clone, Copy, PartialEq)]
+#[derive(defmt::Format, Clone, Copy, PartialEq)]
 pub enum StopBits {
     One,
     Two,
 }
 
-#[derive(Clone, Copy, PartialEq)]
+#[derive(defmt::Format, Clone, Copy, PartialEq)]
 pub enum ParityType {
     None,
     Odd,
@@ -20,7 +20,7 @@ pub enum ConvertError {
     Incompatible,
 }
 
-#[derive(Clone, Copy, PartialEq)]
+#[derive(defmt::Format, Clone, Copy, PartialEq)]
 pub enum DataBits {
     Five,
     Six,
@@ -28,20 +28,25 @@ pub enum DataBits {
     Eight,
 }
 
-#[derive(Clone, Copy, PartialEq)]
+#[derive(defmt::Format, Clone, Copy, PartialEq)]
 pub struct ConfigDTO {
-    pub baudrate: HertzU32,
+    pub baudrate: u32,
     pub data_bits: DataBits,
     pub stop_bits: StopBits,
     pub parity: ParityType,
 }
 impl Default for ConfigDTO {
     fn default() -> Self {
-        Self {
-            baudrate: HertzU32::from_raw(115_200),
-            data_bits: DataBits::Eight,
-            stop_bits: StopBits::One,
-            parity: ParityType::None,
+        let default_cdc = LineCoding::default();
+        if let Ok(line_coding) = ConfigDTO::try_from(&default_cdc) {
+            line_coding
+        } else {
+            Self {
+                baudrate: 115_200,
+                data_bits: DataBits::Eight,
+                stop_bits: StopBits::One,
+                parity: ParityType::None,
+            }
         }
     }
 }
