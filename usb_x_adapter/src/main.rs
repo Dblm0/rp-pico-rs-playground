@@ -6,11 +6,18 @@ use defmt::info;
 use defmt_rtt as _;
 use panic_probe as _;
 
-use fugit::RateExtU32;
 use rp_pico::{
     entry,
-    hal::{self, pac, uart::UartPeripheral, usb::UsbBus, Clock},
+    hal::{
+        self, pac,
+        uart::{UartConfig, UartPeripheral},
+        usb::UsbBus,
+        Clock,
+    },
 };
+
+mod uart_config;
+use uart_config::ConfigDTO;
 use usb_device::{
     class_prelude::UsbBusAllocator,
     prelude::{UsbDevice, UsbDeviceBuilder, UsbVidPid},
@@ -20,6 +27,7 @@ use usbd_serial::SerialPort;
 static mut USB_BUS_ALLOC: Option<UsbBusAllocator<UsbBus>> = None;
 static mut USB_DEV: Option<UsbDevice<UsbBus>> = None;
 static mut USB_SERIAL: Option<SerialPort<UsbBus>> = None;
+static mut UART_CONFIG: Option<ConfigDTO> = None;
 
 const PID_VID: UsbVidPid = UsbVidPid(0x5678, 0x1234);
 
@@ -74,10 +82,8 @@ fn init_for_uart() -> (Delay, EnabledUart0) {
         USB_DEV = Some(device);
     }
 
-    // The single-cycle I/O block controls our GPIO pins
     let sio = hal::Sio::new(pac.SIO);
 
-    // Set the pins to their default state
     let pins = rp_pico::Pins::new(
         pac.IO_BANK0,
         pac.PADS_BANK0,
@@ -85,23 +91,17 @@ fn init_for_uart() -> (Delay, EnabledUart0) {
         &mut pac.RESETS,
     );
     let uart_pins = (
-        // UART TX (characters sent from RP2040) on pin 1 (GPIO0)
         pins.gpio0.into_mode::<hal::gpio::FunctionUart>(),
-        // UART RX (characters received by RP2040) on pin 2 (GPIO1)
         pins.gpio1.into_mode::<hal::gpio::FunctionUart>(),
     );
 
-    // Make a UART on the given pins
+    unsafe {
+        UART_CONFIG = Some(ConfigDTO::default());
+    }
+
+    let conf = UartConfig::from(unsafe { UART_CONFIG.as_ref().unwrap() });
     let uart = UartPeripheral::new(pac.UART0, uart_pins, &mut pac.RESETS)
-        .enable(
-            hal::uart::UartConfig::new(
-                115200.Hz(),
-                hal::uart::DataBits::Eight,
-                None,
-                hal::uart::StopBits::One,
-            ),
-            clocks.peripheral_clock.freq(),
-        )
+        .enable(conf, clocks.peripheral_clock.freq())
         .unwrap();
     (delay, uart)
 }
