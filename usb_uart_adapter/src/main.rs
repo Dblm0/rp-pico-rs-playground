@@ -1,9 +1,9 @@
 #![no_std]
 #![no_main]
 
-use cortex_m::delay::Delay;
 use defmt::info;
 use defmt_rtt as _;
+use embedded_hal::digital::v2::OutputPin;
 use panic_probe as _;
 
 use rp_pico::{
@@ -30,9 +30,10 @@ static mut USB_DEV: Option<UsbDevice<UsbBus>> = None;
 static mut USB_SERIAL: Option<SerialPort<UsbBus>> = None;
 static mut UART_CONFIG: Option<UartConfigWithRate> = None;
 static mut UART: Option<EnabledUart0> = None;
-
+static mut LED: Option<LedPin> = None;
 const PID_VID: UsbVidPid = UsbVidPid(0x5678, 0x1234);
 
+type LedPin = hal::gpio::Pin<hal::gpio::bank0::Gpio25, hal::gpio::Output<hal::gpio::PushPull>>;
 type EnabledUart0 = UartPeripheral<
     hal::uart::Enabled,
     pac::UART0,
@@ -107,6 +108,13 @@ fn init_statics() {
         .enable(conf, rate)
         .unwrap();
     unsafe { UART = Some(uart) };
+
+    unsafe {
+        LED = Some(
+            pins.led
+                .into_push_pull_output_in_state(hal::gpio::PinState::Low),
+        );
+    }
 }
 
 fn try_reconfigure_uart(
@@ -123,7 +131,11 @@ fn try_reconfigure_uart(
     }
     result
 }
-
+fn led_blinked_routine(led: &mut LedPin, routine: impl FnOnce()) {
+    let _ = led.set_high();
+    routine();
+    let _ = led.set_low();
+}
 #[entry]
 fn main() -> ! {
     init_statics();
@@ -134,6 +146,8 @@ fn main() -> ! {
 
     let mut usb_send_buf = [0u8; 128];
     let mut usb_receive_buf = [0u8; 128];
+
+    let led_diag = unsafe { LED.as_mut().unwrap() };
 
     loop {
         if let Some(conf) = new_config {
@@ -149,9 +163,11 @@ fn main() -> ! {
         loop {
             //Read data from UART and send it to USB Serial
             if let Ok(readen) = uart.read_raw(&mut usb_send_buf) {
-                if let Ok(written) = usb_sp.write(&usb_send_buf[0..readen]) {
-                    info!("{} of {} byte written to USB", written, readen);
-                }
+                led_blinked_routine(led_diag, || {
+                    if let Ok(written) = usb_sp.write(&usb_send_buf[0..readen]) {
+                        info!("{} of {} byte written to USB", written, readen);
+                    }
+                });
             }
 
             if usb.poll(&mut [usb_sp]) {
@@ -161,10 +177,12 @@ fn main() -> ! {
                     let mut written = 0;
 
                     while !data_to_send.is_empty() {
-                        if let Ok(rem) = uart.write_raw(data_to_send) {
-                            written += data_to_send.len() - rem.len();
-                            data_to_send = rem;
-                        }
+                        led_blinked_routine(led_diag, || {
+                            if let Ok(rem) = uart.write_raw(data_to_send) {
+                                written += data_to_send.len() - rem.len();
+                                data_to_send = rem;
+                            }
+                        });
                     }
 
                     info!("{} of {} byte written to UART", written, readen);
