@@ -1,5 +1,5 @@
 [package]
-name = "usb_x_adapter"
+name = "usb_uart_adapter"
 version = "0.1.0"
 edition = "2021"
 

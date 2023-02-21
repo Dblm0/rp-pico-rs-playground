@@ -5,7 +5,7 @@ members = [
     "enc28j60_tcp",
     "on_chip_tests",
     "signal_generator",
-    "usb_x_adapter",
+    "usb_uart_adapter",
 ]
 
 [workspace.dependencies]
