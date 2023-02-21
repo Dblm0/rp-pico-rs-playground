@@ -41,7 +41,7 @@ type EnabledUart0 = UartPeripheral<
         hal::gpio::Pin<hal::gpio::bank0::Gpio1, hal::gpio::Function<hal::gpio::Uart>>,
     ),
 >;
-fn init_for_uart() -> (Delay, EnabledUart0) {
+fn init_statics() {
     let mut pac = pac::Peripherals::take().unwrap();
     let mut watchdog = hal::Watchdog::new(pac.WATCHDOG);
     let clocks = hal::clocks::init_clocks_and_plls(
@@ -55,8 +55,6 @@ fn init_for_uart() -> (Delay, EnabledUart0) {
     )
     .ok()
     .unwrap();
-    let core = pac::CorePeripherals::take().unwrap();
-    let delay = cortex_m::delay::Delay::new(core.SYST, clocks.system_clock.freq().to_Hz());
 
     let usb = hal::usb::UsbBus::new(
         pac.USBCTRL_REGS,
@@ -108,7 +106,7 @@ fn init_for_uart() -> (Delay, EnabledUart0) {
     let uart = UartPeripheral::new(pac.UART0, uart_pins, &mut pac.RESETS)
         .enable(conf, rate)
         .unwrap();
-    (delay, uart)
+    unsafe { UART = Some(uart) };
 }
 
 fn try_reconfigure_uart(
@@ -128,8 +126,8 @@ fn try_reconfigure_uart(
 
 #[entry]
 fn main() -> ! {
-    let (_delay, initial_uart) = init_for_uart();
-    unsafe { UART = Some(initial_uart) };
+    init_statics();
+
     let (usb, usb_sp) = unsafe { (USB_DEV.as_mut().unwrap(), USB_SERIAL.as_mut().unwrap()) };
     let mut new_config: Option<ConfigDTO> = None;
     info!("USB Initialized");
