@@ -162,6 +162,7 @@ fn main() -> ! {
         let uart = unsafe { UART.as_ref().unwrap() };
         loop {
             //Read data from UART and send it to USB Serial
+            //TODO:Fix data loss due to the pauses caused by defmt 
             if let Ok(readen) = uart.read_raw(&mut usb_send_buf) {
                 led_blinked_routine(led_diag, || {
                     if let Ok(written) = usb_sp.write(&usb_send_buf[0..readen]) {
