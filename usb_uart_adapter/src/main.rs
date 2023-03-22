@@ -42,6 +42,16 @@ mod app {
 
     //make both buffers the same length to prevent data losses
     const BUF_SIZE: usize = 32;
+
+    static mut GLOBAL_TIMER: Option<hal::Timer> = None;
+
+    defmt::timestamp!("{=u64:us}", unsafe {
+        if let Some(timer) = &GLOBAL_TIMER {
+            timer.get_counter().ticks()
+        } else {
+            0
+        }
+    });
     #[local]
     struct Local {
         led: PwmLed,
@@ -118,6 +128,7 @@ mod app {
         pwm.set_ph_correct();
         pwm.enable();
 
+        unsafe { GLOBAL_TIMER.replace(rp_pico::hal::Timer::new(pac.TIMER, &mut pac.RESETS)) };
         (
             Shared { usb_serial, uart },
             Local {
