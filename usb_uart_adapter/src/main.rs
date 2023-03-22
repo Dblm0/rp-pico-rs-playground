@@ -40,8 +40,8 @@ mod app {
         usb_serial: SerialPort<'static, UsbBus>,
     }
 
-    const TX_SIZE: usize = 32;
-    const RX_SIZE: usize = 64;
+    //make both buffers the same length to prevent data losses
+    const BUF_SIZE: usize = 32;
     #[local]
     struct Local {
         led: PwmLed,
@@ -149,9 +149,8 @@ mod app {
         binds = UART0_IRQ,
         priority = 2,
         shared = [usb_serial, uart],
-        local = [usb_send_buf: [u8; TX_SIZE] = [0; TX_SIZE]]
+        local = [usb_send_buf: [u8; BUF_SIZE] = [0; BUF_SIZE]]
     )]
-
     fn uart_irq(c: uart_irq::Context) {
         (c.shared.usb_serial, c.shared.uart).lock(|usb_serial, uart| {
             // Read data from UART and send it to USB Serial
@@ -169,12 +168,12 @@ mod app {
 
     #[task(
         binds = USBCTRL_IRQ,
-        priority = 2,
+        priority = 1, //priority is less than in uart_irq task to prevent data losses
         shared = [usb_serial, uart],
         local = [
             usb_dev,
             uart_config,
-            usb_receive_buf: [u8; RX_SIZE] = [0; RX_SIZE]
+            usb_receive_buf: [u8; BUF_SIZE] = [0; BUF_SIZE]
         ],
     )]
     fn usbctrl_irq(mut c: usbctrl_irq::Context) {
