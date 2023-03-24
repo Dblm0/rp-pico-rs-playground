@@ -4,6 +4,10 @@
 use defmt_rtt as _;
 use panic_probe as _;
 
+defmt::timestamp!("{=u64:us}", {
+    crate::app::monotonics::now().ticks()
+});
+
 #[rtic::app(device = rp_pico::hal::pac, peripherals = true, dispatchers = [SW0_IRQ])]
 mod app {
     use defmt::info;
@@ -87,11 +91,10 @@ mod app {
         pin.set_low().unwrap();
         *c.local.count = (*c.local.count + 1) % 1000;
         if *c.local.count % 5 == 0 {
-            pin_toggle::spawn_after(200.micros()).unwrap();
+            pin_toggle::spawn_after(100.millis()).unwrap();
+            info!("Pin toggled!");
         } else {
-            pin_toggle::spawn_after(5.micros()).unwrap();
+            pin_toggle::spawn_after(100.micros()).unwrap();
         }
-
-        // info!("Pin toggled!");
     }
 }
