@@ -6,6 +6,7 @@ members = [
     "on_chip_tests",
     "signal_generator",
     "usb_uart_adapter",
+    "rtic_monotonic",
 ]
 
 [workspace.dependencies]
