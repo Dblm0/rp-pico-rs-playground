@@ -8,11 +8,9 @@ use panic_probe as _;
 use bsp::{
     entry,
     hal::{
-        gpio::{
-            bank0::{Gpio2, Gpio20},
-            FunctionPio0, PinId,
-        },
+        gpio::{FunctionPio0, PinId},
         pac,
+        pll::PLLConfig,
         prelude::_rphal_pio_PIOExt,
         sio::Sio,
         watchdog::Watchdog,
@@ -21,23 +19,33 @@ use bsp::{
 };
 use rp_pico as bsp;
 
+use crate::custom_clock::PllConfigurator;
+mod custom_clock;
+
+pub const PLL_SYS_250MHZ: PLLConfig = PLLConfig {
+    vco_freq: fugit::HertzU32::MHz(1500),
+    refdiv: 1,
+    post_div1: 3,
+    post_div2: 2,
+};
+
 #[entry]
 fn main() -> ! {
     let mut pac = pac::Peripherals::take().unwrap();
     let mut watchdog = Watchdog::new(pac.WATCHDOG);
     let core = pac::CorePeripherals::take().unwrap();
-
-    let clocks = bsp::hal::clocks::init_clocks_and_plls(
-        rp_pico::XOSC_CRYSTAL_FREQ,
-        pac.XOSC,
-        pac.CLOCKS,
-        pac.PLL_SYS,
-        pac.PLL_USB,
-        &mut pac.RESETS,
-        &mut watchdog,
-    )
-    .ok()
-    .unwrap();
+    let clocks = PllConfigurator::with(PLL_SYS_250MHZ)
+        .init_clocks_and_plls(
+            rp_pico::XOSC_CRYSTAL_FREQ,
+            pac.XOSC,
+            pac.CLOCKS,
+            pac.PLL_SYS,
+            pac.PLL_USB,
+            &mut pac.RESETS,
+            &mut watchdog,
+        )
+        .ok()
+        .unwrap();
 
     let sys_freq = clocks.system_clock.freq().to_Hz();
     info!("System clock freq :{} MHz", sys_freq as f32 / 1e6);
