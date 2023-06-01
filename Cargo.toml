@@ -1,16 +1,5 @@
 [workspace]
-members = [
-    "common_extensions",
-
-    "blink",
-    "big_firmware",
-    "enc28j60_tcp",
-    "on_chip_tests",
-    "signal_generator",
-    "usb_uart_adapter",
-    "rtic_monotonic",
-    "overclock",
-]
+members = ["./projects/*"]
 
 [workspace.dependencies]
 rp-pico = "0.6.0"
