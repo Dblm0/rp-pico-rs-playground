@@ -16,6 +16,7 @@ panic-probe.workspace = true
 defmt-test.workspace = true
 
 num-traits = { version = "0.2", default-features = false }
+common_extensions = { path = "../common_extensions" }
 
 [[test]]
 name = "temperature_tests"

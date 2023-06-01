@@ -20,7 +20,7 @@ use bsp::{
 use rp_pico as bsp;
 
 use common_extensions::custom_clock::PllConfigurator;
-
+use common_extensions::temperature as sens;
 pub const PLL_SYS_250MHZ: PLLConfig = PLLConfig {
     vco_freq: fugit::HertzU32::MHz(1500),
     refdiv: 1,
@@ -99,27 +99,4 @@ fn create_pio_prog() -> pio::Program<32> {
     a.set_with_delay(pio::SetDestination::PINS, 1, MAX_DELAY);
     a.bind(&mut wrap_source);
     a.assemble_with_wrap(wrap_source, wrap_target)
-}
-
-mod sens {
-    use embedded_hal::adc::OneShot;
-    use rp_pico::hal::{adc::TempSense, Adc};
-    pub struct TemperatureSensor {
-        adc: Adc,
-        sensor: TempSense,
-    }
-
-    const IO_VDD: f32 = 3.3;
-    const ADC_FACTOR: f32 = 4096.0;
-
-    impl TemperatureSensor {
-        pub fn new(adc: Adc, sensor: TempSense) -> Self {
-            TemperatureSensor { adc, sensor }
-        }
-        pub fn read_temperature(&mut self) -> f32 {
-            let digits: u16 = self.adc.read(&mut self.sensor).unwrap();
-            let sensor_v = IO_VDD * (digits as f32 / ADC_FACTOR);
-            27.0 - (sensor_v - 0.706) / 0.001721
-        }
-    }
 }
