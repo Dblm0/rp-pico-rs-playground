@@ -1,0 +1,16 @@
+[package]
+edition = "2021"
+name = "overclock"
+version = "0.1.0"
+
+[dependencies]
+pio = "0.2.0"
+rp-pico.workspace = true
+cortex-m.workspace = true
+cortex-m-rt.workspace = true
+embedded-hal.workspace = true
+fugit.workspace = true
+
+defmt.workspace = true
+defmt-rtt.workspace = true
+panic-probe.workspace = true

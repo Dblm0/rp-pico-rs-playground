@@ -561,6 +561,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "overclock"
+version = "0.1.0"
+dependencies = [
+ "cortex-m",
+ "cortex-m-rt",
+ "defmt",
+ "defmt-rtt",
+ "embedded-hal",
+ "fugit",
+ "panic-probe",
+ "pio",
+ "rp-pico",
+]
+
+[[package]]
 name = "owning-slice"
 version = "0.1.0"
 source = "git+https://github.com/japaric/owning-slice#f8c70ead919bb26d11eaf01408eca2cd48cb8c72"
