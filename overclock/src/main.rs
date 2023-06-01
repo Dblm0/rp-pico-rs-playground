@@ -19,8 +19,7 @@ use bsp::{
 };
 use rp_pico as bsp;
 
-use crate::custom_clock::PllConfigurator;
-mod custom_clock;
+use common_extensions::custom_clock::PllConfigurator;
 
 pub const PLL_SYS_250MHZ: PLLConfig = PLLConfig {
     vco_freq: fugit::HertzU32::MHz(1500),

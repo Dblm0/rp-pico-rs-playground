@@ -1,5 +1,7 @@
 [workspace]
 members = [
+    "common_extensions",
+
     "blink",
     "big_firmware",
     "enc28j60_tcp",
