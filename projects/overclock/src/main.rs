@@ -21,12 +21,15 @@ use rp_pico as bsp;
 
 use common_extensions::custom_clock::PllConfigurator;
 use common_extensions::temperature as sens;
-pub const PLL_SYS_250MHZ: PLLConfig = PLLConfig {
+const PLL_SYS_250MHZ: PLLConfig = PLLConfig {
     vco_freq: fugit::HertzU32::MHz(1500),
     refdiv: 1,
     post_div1: 3,
     post_div2: 2,
 };
+
+const PIO_DIV_INT: u16 = 1;
+const PIO_DIV_FRAC: u8 = 0;
 
 #[entry]
 fn main() -> ! {
@@ -61,10 +64,9 @@ fn main() -> ! {
     let program = create_pio_prog();
     let (mut pio, sm0, _, _, _) = pac.PIO0.split(&mut pac.RESETS);
     let installed = pio.install(&program).unwrap();
-    let (int, frac) = (0, 0); // as slow as possible (0 is interpreted as 65536)
     let (sm, _, _) = bsp::hal::pio::PIOBuilder::from_program(installed)
         .set_pins(get_pin_id(test_pin), 1)
-        .clock_divisor_fixed_point(int, frac)
+        .clock_divisor_fixed_point(PIO_DIV_INT, PIO_DIV_FRAC)
         .build(sm0);
     sm.start();
 
