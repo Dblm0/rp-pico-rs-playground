@@ -16,11 +16,12 @@ panic-probe.workspace = true
 
 [dependencies.enc28j60]
 git = "https://github.com/Dblm0/enc28j60"
-rev = "32e7b1aafbdab76e608d743d2c620514c3e33da9"
+branch = "feat_smoltcp"
+version = "0.4.0"
 features = ["smoltcp"]
 
 [dependencies.smoltcp]
 git = "https://github.com/smoltcp-rs/smoltcp"
-version = "0.8.1"
+version = "0.9.1"
 default-features = false
 features = ["proto-ipv4", "socket-tcp", "medium-ethernet", "defmt"]

@@ -10,10 +10,10 @@ use fugit::RateExtU32;
 use panic_probe as _;
 use rp_pico::hal::{self, gpio, pac, prelude::*, spi};
 use smoltcp::{
-    iface::{InterfaceBuilder, NeighborCache, SocketSet},
+    iface::{Config, Interface, SocketSet},
     socket::tcp,
     time::Instant,
-    wire::{EthernetAddress, IpAddress, IpCidr, Ipv4Address},
+    wire::{EthernetAddress, HardwareAddress, IpAddress, IpCidr, Ipv4Address},
 };
 /* Configuration */
 const SRC_MAC: [u8; 6] = [0x20, 0x18, 0x03, 0x01, 0x00, 0x00];
@@ -94,16 +94,17 @@ fn main() -> ! {
     debug!("Phy Wrapper created");
 
     // Ethernet interface
-    let mut ip_addrs = [IpCidr::new(IpAddress::from(LOCAL_ADDR), 24)];
-    let mut neighbor_storage = [None; 16];
-    let neighbor_cache = NeighborCache::new(&mut neighbor_storage[..]);
     let ethernet_addr = EthernetAddress(SRC_MAC);
-    let mut iface = InterfaceBuilder::new()
-        .hardware_addr(ethernet_addr.into())
-        .ip_addrs(&mut ip_addrs[..])
-        .neighbor_cache(neighbor_cache)
-        .finalize(&mut eth);
-    debug!("Ethernet initialized with ip addr {}", iface.ipv4_address());
+    let config = Config::new(HardwareAddress::Ethernet(ethernet_addr));
+    let mut iface = Interface::new(config, &mut eth, Instant::ZERO);
+
+    iface.update_ip_addrs(|ip_addrs| {
+        ip_addrs
+            .push(IpCidr::new(IpAddress::from(LOCAL_ADDR), 24))
+            .unwrap();
+    });
+
+    debug!("Ethernet initialized with ip addr {}", iface.ipv4_addr());
 
     // Sockets
     let mut server_rx_buffer = [0; 2048];
@@ -120,11 +121,8 @@ fn main() -> ! {
 
     let mut count: u8 = 0;
     loop {
-        match iface.poll(Instant::from_millis(0), &mut eth, &mut sockets) {
-            Ok(_) => {}
-            Err(e) => {
-                debug!("poll error: {}", e);
-            }
+        if !iface.poll(Instant::from_millis(0), &mut eth, &mut sockets) {
+            continue;
         };
 
         let socket = sockets.get_mut::<tcp::Socket>(server_handle);
