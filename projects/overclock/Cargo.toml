@@ -4,7 +4,7 @@ name = "overclock"
 version = "0.1.0"
 
 [dependencies]
-pio = "0.2.0"
+pio = "0.2.1"
 common_extensions = { path = "../common_extensions" }
 rp-pico.workspace = true
 cortex-m.workspace = true

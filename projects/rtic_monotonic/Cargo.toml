@@ -19,4 +19,4 @@ panic-probe.workspace = true
 cortex-m-rtic = "1.1.4"
 [dependencies.rp2040-hal]
 features = ["rtic-monotonic"]
-version = "0.7.0"
+version = "0.8.2"
